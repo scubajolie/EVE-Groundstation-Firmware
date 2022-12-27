@@ -1,15 +1,13 @@
+#include <stdio.h>
 #include <Arduino.h>
 
-// Pin definitions
-#include "pins.h"
+#include <helper.h>
 
 // Telemetry helpers
-#include "telemetry.h"
+#include <telemetry.h>
 
-// Filesystem helpers
-#include "filesystem.h"
 
-static void printBaseStationTelemetry() {
+void printBaseStationTelemetry() {
     // Parse timestamp
     char _buf[64];
     sprintf(_buf, "%04d-%02d-%02dT%02d:%02d:%02d.%03d", data.year, data.month, data.day, data.hour, data.minute, data.second, data.msecond);

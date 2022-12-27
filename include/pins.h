@@ -1,3 +1,6 @@
+#ifndef EVE_PINS_H
+#define EVE_PINS_H
+
 #include <SPI.h>
 
 #ifdef PROTOTYPE
@@ -10,5 +13,7 @@
     #define RFM_CS_PIN 38
     #define RFM_RST_PIN 0
     #define RFM_IRQ_PIN 33
+
+#endif
 
 #endif

@@ -1,3 +1,8 @@
+#ifndef EVE_TELEMETRY_H
+#define EVE_TELEMETRY_H
+
+#include <stdint.h>
+
 struct Telemetry {
     float voltage;              // Battery voltage in V
     uint8_t month;              // Month from GPS data 
@@ -38,4 +43,8 @@ struct Telemetry {
     float humidity;              // % from the SHT31-D sensor
     int8_t state;                // State reported by the launchsonde.
     uint8_t packetSize;         // The size of the telemetry packet. Used as a debug tool for ground station/launchsonde comms.
-} data;
+};
+
+extern Telemetry data;
+
+#endif
