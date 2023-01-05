@@ -1,3 +1,7 @@
+/* Defines the data structure which stores data recieved by the launchsonde.
+* This header also includes functions which interact with the Telemetry data structure.
+*/
+
 #ifndef EVE_TELEMETRY_H
 #define EVE_TELEMETRY_H
 
@@ -46,5 +50,7 @@ struct Telemetry {
 };
 
 extern Telemetry data;
+
+void printBaseStationTelemetry();
 
 #endif

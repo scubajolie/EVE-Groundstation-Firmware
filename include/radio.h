@@ -1,3 +1,6 @@
+/* Defines the types of packets sent and recieved by the launchsonde.
+*/
+
 #ifndef EVE_PACKETTYPE_H
 #define EVE_PACKETTYPE_H
 

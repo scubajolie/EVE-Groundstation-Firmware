@@ -1,31 +1,34 @@
-#include <helper.h>
 #include <pins.h>
 #include <LoRa.h>
 #include <radio.h>
 #include <fstream>
 #include <ESP32FtpServer.h>
-#include <ESP32_files.h>
 #include <telemetry.h>
 #include <filesystem.h>
+
+/* Prints error message to the serial port. 
+* @param msg: string describing error message
+* @param error: error number (integer)
+*/
+void serialError(const char * msg, int error ) {
+    Serial.printf( "ERROR [%d]: %s \n", error, msg );
+}
 
 void setup() {
 	Serial.begin(115200);
 	while(!Serial); // Wait for serial connection to open
 
-    ESP32_setup();
+    int status = ESP32_setup();
+    if (status != 0) {
+        serialError("ESP32_setup failed.", status );
+        return;
+    }
 
 	// Initialize LoRa Radio
 	Serial.print("Initializing radio...");
     LoRa.setPins(RFM_CS_PIN, RFM_RST_PIN, RFM_IRQ_PIN);
     LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, FSPI_CS_PIN);
     LoRa.setSPI(LoRaSPI);
-    
-    
-    // Initialize SD card
-    // initSDCard();
-    // if (!initSDCard()){
-    //     Serial.print("SD card has failed!");
-    // }
 
     // Initialize files for Telemetery, State, and Log data
     
@@ -35,8 +38,9 @@ void setup() {
     // writeFile(SD, LogFile, "Log File: ");
     // writeFile(SD, CommandFile, "Command File:");
 
+    // TO-DO: Add Blink header file to have error blink codes for Core
     if (!LoRa.begin(915E6)) {
-        Serial.println("G: Starting LoRa failed!");
+        serialError("G: Starting LoRa failed!", 0);
         // while(true) blinkCode((byte) RADIO_ERROR_CODE, RED); // Block further code execution
     }
     LoRa.setSyncWord(0xF3);

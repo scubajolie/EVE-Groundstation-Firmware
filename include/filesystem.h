@@ -1,3 +1,9 @@
+/* Defines multiple functions capable of interacting with files
+* stored on an SD card connected to the ESP32 on the groundstation
+*
+**/
+
+
 #ifndef EVE_FILESYSTEM_H
 #define EVE_FILESYSTEM_H
 
@@ -8,8 +14,6 @@ extern const char * TelemetryFile;
 extern const char * StateFile;
 extern const char * LogFile;
 extern const char * CommandFile;
-
-bool initSDCard();
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 

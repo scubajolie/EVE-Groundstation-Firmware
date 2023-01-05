@@ -16,7 +16,10 @@ const char * StateFile     = "/StateFile.txt";
 const char * LogFile       = "/LogFile.txt";
 const char * CommandFile   = "/CommandFile.txt";
 
-bool initSDCard() {
+// TODO: Change ifdefs so that when groundstation is connected
+// all error messages are sent.
+
+/*bool initSDCard() {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.print("Initializing filesystem...");
     #endif
@@ -30,7 +33,7 @@ bool initSDCard() {
         return false;
     }
     return _success;
-}
+}*/
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     #ifdef DEBUG_SERIAL

@@ -1,3 +1,6 @@
+/* Defines commands capable of being sent to the launchsonde. 
+*/
+
 #ifndef EVE_COMMAND_H
 #define EVE_COMMAND_H
 

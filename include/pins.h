@@ -1,3 +1,7 @@
+/* Defines pinouts for the LoRa and SPI boards connected
+* to the ESP32 board of the groundstation
+*/
+
 #ifndef EVE_PINS_H
 #define EVE_PINS_H
 
