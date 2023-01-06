@@ -15,24 +15,24 @@ extern const char * StateFile;
 extern const char * LogFile;
 extern const char * CommandFile;
 
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 
-bool createDir(fs::FS &fs, const char * path); 
+bool SD_createDir(fs::FS &fs, const char * path); 
 
-bool removeDir(fs::FS &fs, const char * path); 
+bool SD_removeDir(fs::FS &fs, const char * path); 
 
-bool readFile(fs::FS &fs, const char * path);
+bool SD_readFile(fs::FS &fs, const char * path);
 
-bool writeFile(fs::FS &fs, const char * path, const char * message);
+bool SD_writeFile(fs::FS &fs, const char * path, const char * message);
 
-bool appendFile(fs::FS &fs, const char * path, const char * message);
+bool SD_appendFile(fs::FS &fs, const char * path, const char * message);
 
-bool renameFile(fs::FS &fs, const char * path1, const char * path2);
+bool SD_renameFile(fs::FS &fs, const char * path1, const char * path2);
 
-bool deleteFile(fs::FS &fs, const char * path);
+bool SD_deleteFile(fs::FS &fs, const char * path);
 
-void testFileIO(fs::FS &fs, const char * path);
+void SD_testFileIO(fs::FS &fs, const char * path);
 
-bool initLogFile(fs::FS &fs, char * path, char * header);
+bool SD_initLogFile(fs::FS &fs, char * path, char * header);
 
 #endif

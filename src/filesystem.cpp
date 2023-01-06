@@ -35,7 +35,7 @@ const char * CommandFile   = "/CommandFile.txt";
     return _success;
 }*/
 
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
+void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Listing directory: %s\n\r", dirname);
     #endif
@@ -63,7 +63,7 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
                 DEBUG_SERIAL.println(file.name());
             #endif
             if (levels){
-                listDir(fs, file.path(), levels--);
+                SD_listDir(fs, file.path(), levels--);
             }
         } 
         else {
@@ -78,7 +78,7 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     }
 }
 
-bool createDir(fs::FS &fs, const char * path) {
+bool SD_createDir(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Creating Dir: %s ...", path);
     #endif
@@ -89,7 +89,7 @@ bool createDir(fs::FS &fs, const char * path) {
     return _success;
 }
 
-bool removeDir(fs::FS &fs, const char * path) {
+bool SD_removeDir(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Removing Dir: %s ", path);
     #endif
@@ -100,7 +100,7 @@ bool removeDir(fs::FS &fs, const char * path) {
     return _success;
 }
 
-bool readFile(fs::FS &fs, const char * path) {
+bool SD_readFile(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Reading file: %s\r\n", path);
     #endif
@@ -125,7 +125,7 @@ bool readFile(fs::FS &fs, const char * path) {
     return true;
 }
 
-bool writeFile(fs::FS &fs, const char * path, const char * message) {
+bool SD_writeFile(fs::FS &fs, const char * path, const char * message) {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Writing file: %s\n\r", path);
     #endif
@@ -145,7 +145,7 @@ bool writeFile(fs::FS &fs, const char * path, const char * message) {
     return _success;
 }
 
-bool appendFile(fs::FS &fs, const char * path, const char * message) {
+bool SD_appendFile(fs::FS &fs, const char * path, const char * message) {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Appending file: %s\n\r", path);
     #endif
@@ -166,7 +166,7 @@ bool appendFile(fs::FS &fs, const char * path, const char * message) {
     return _success;
 }
 
-bool renameFile(fs::FS &fs, const char * path1, const char * path2) {
+bool SD_renameFile(fs::FS &fs, const char * path1, const char * path2) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Renaming file %s to %s\n\r", path1, path2);
     #endif
@@ -177,7 +177,7 @@ bool renameFile(fs::FS &fs, const char * path1, const char * path2) {
     return _success;
 }
 
-bool deleteFile(fs::FS &fs, const char * path) {
+bool SD_deleteFile(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Deleting file: %s\n\r", path);
     #endif
@@ -188,7 +188,7 @@ bool deleteFile(fs::FS &fs, const char * path) {
     return _success;
 }
 
-void testFileIO(fs::FS &fs, const char * path) {
+void SD_testFileIO(fs::FS &fs, const char * path) {
     File file = fs.open(path);
     static uint8_t buf[512];
     size_t len = 0;
@@ -238,7 +238,7 @@ void testFileIO(fs::FS &fs, const char * path) {
     file.close();
 }
 
-bool initLogFile(fs::FS &fs, char * path, char * header) {
+bool SD_initLogFile(fs::FS &fs, char * path, char * header) {
     for (uint8_t x=0; x<255; x++) { // Initialize log file
         sprintf(path, "/log_%03d.csv", x);
         if (!fs.exists(path)) break; // If a new unique log file has been named, exit loop
@@ -255,6 +255,6 @@ bool initLogFile(fs::FS &fs, char * path, char * header) {
     #endif
 
     // Write header for the log file
-    writeFile(fs, path, header);
+    SD_writeFile(fs, path, header);
     return true;
 }

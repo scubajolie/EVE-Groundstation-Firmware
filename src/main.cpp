@@ -32,11 +32,11 @@ void setup() {
 
     // Initialize files for Telemetery, State, and Log data
     
-    // createDir(SD, "/EVEdir");
-    // writeFile(SD, TelemetryFile, "Telemetry Data File:");
-    // writeFile(SD, StateFile, "State Fle: ");
-    // writeFile(SD, LogFile, "Log File: ");
-    // writeFile(SD, CommandFile, "Command File:");
+    // SD_createDir(SD, "/EVEdir");
+    // SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
+    // SD_writeFile(SD, StateFile, "State Fle: ");
+    // SD_writeFile(SD, LogFile, "Log File: ");
+    // SD_writeFile(SD, CommandFile, "Command File:");
 
     // TO-DO: Add Blink header file to have error blink codes for Core
     if (!LoRa.begin(915E6)) {
@@ -46,11 +46,6 @@ void setup() {
     LoRa.setSyncWord(0xF3);
     Serial.println("done!");
 
-	// Initialize filesystem
-	// #define SDCARD_DEBUG
-	// if (!initSDCard()) { // Initialize filesystem and check if good
-    //     // while(true) blinkCode(CARD_MOUNT_ERROR_CODE); // Block further code execution
-    // }
     Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \
                     accelY (m/s),accelZ (m/s),gyroX (rad/s),gyroY (rad/s),gyroZ (rad/s), roll (°), pitch (°), yaw (°), \
@@ -89,25 +84,25 @@ void loop() {
         switch(packetType) {
             case TELEMETRY_PACKET:
                 printBaseStationTelemetry();
-                appendFile(SD,TelemetryFile,_buf);
+                SD_appendFile(SD,TelemetryFile,_buf);
             break;
             case LOG_PACKET:
                 #ifdef DIAGNOSTIC
                     Serial.println("Log packet Recieved");
                 #endif
-                appendFile(SD,LogFile,_buf);
+                SD_appendFile(SD,LogFile,_buf);
             break;
             case COMMAND_PACKET:
                 #ifdef DIAGNOSTIC
                     Serial.println("Command Recieved");
                 #endif
-                appendFile(SD,CommandFile,_buf);
+                SD_appendFile(SD,CommandFile,_buf);
             break;
             case STATE_PACKET:
                 #ifdef DIAGNOSTIC
                     Serial.println("State Recieved");
                 #endif
-                appendFile(SD,StateFile,_buf);
+                SD_appendFile(SD,StateFile,_buf);
             break;
             default:
                 Serial.println("Unknown LoRa Packet Type");
