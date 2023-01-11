@@ -6,6 +6,8 @@
 #include <telemetry.h>
 #include <filesystem.h>
 
+#define SERIAL
+
 /* Prints error message to the serial port. 
 * @param msg: string describing error message
 * @param error: error number (integer)
@@ -18,11 +20,14 @@ void setup() {
 	Serial.begin(115200);
 	while(!Serial); // Wait for serial connection to open
 
-    int status = ESP32_setup();
-    if (status != 0) {
-        serialError("ESP32_setup failed.", status );
-        return;
-    }
+    // If connected to the serial port, establish wifi and FTP server connection. 
+    #ifdef SERIAL
+        int status = ESP32_setup();
+        if (status != 0) {
+            serialError("ESP32_setup failed.", status );
+            return;
+        }
+    #endif
 
 	// Initialize LoRa Radio
 	Serial.print("Initializing radio...");
@@ -31,12 +36,18 @@ void setup() {
     LoRa.setSPI(LoRaSPI);
 
     // Initialize files for Telemetery, State, and Log data
+    #ifndef SERIAL
+        int status = initSDcard();
+        if (status != 0){
+            serialError("SD card setup failed.", status);
+        }
+    #endif
     
-    // SD_createDir(SD, "/EVEdir");
-    // SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
-    // SD_writeFile(SD, StateFile, "State Fle: ");
-    // SD_writeFile(SD, LogFile, "Log File: ");
-    // SD_writeFile(SD, CommandFile, "Command File:");
+    SD_createDir(SD, "/EVEdir");
+    SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
+    SD_writeFile(SD, StateFile, "State Fle: ");
+    SD_writeFile(SD, LogFile, "Log File: ");
+    SD_writeFile(SD, CommandFile, "Command File:");
 
     // TO-DO: Add Blink header file to have error blink codes for Core
     if (!LoRa.begin(915E6)) {

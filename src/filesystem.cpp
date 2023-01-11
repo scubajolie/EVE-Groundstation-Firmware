@@ -19,7 +19,7 @@ const char * CommandFile   = "/CommandFile.txt";
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
 
-/*bool initSDCard() {
+int initSDCard() {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.print("Initializing filesystem...");
     #endif
@@ -30,10 +30,10 @@ const char * CommandFile   = "/CommandFile.txt";
     uint8_t cardType = SD.cardType();
     if (cardType == CARD_NONE) {
         Serial.println("No SD card attached");
-        return false;
+        return SETUP_FAIL_SD_CARD;
     }
-    return _success;
-}*/
+    return 0;
+}
 
 void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     #ifdef DEBUG_SERIAL
@@ -129,6 +129,7 @@ bool SD_writeFile(fs::FS &fs, const char * path, const char * message) {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Writing file: %s\n\r", path);
     #endif
+    
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
         #ifdef SDCARD_DEBUG
