@@ -11,10 +11,10 @@
 // https://randomnerdtutorials.com/esp32-microsd-card-arduino/
 // #define DEBUG_SERIAL Serial // TODO: Declare this in a variants file
 
-const char * TelemetryFile = "/TelemetryFile.txt";
-const char * StateFile     = "/StateFile.txt";
-const char * LogFile       = "/LogFile.txt";
-const char * CommandFile   = "/CommandFile.txt";
+const char * TelemetryFile = "/EVEDir/TelemetryFile.txt";
+const char * StateFile     = "/EVEDir/StateFile.txt";
+const char * LogFile       = "/EVEDir/LogFile.txt";
+const char * CommandFile   = "/EVEDir/CommandFile.txt";
 
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
@@ -35,7 +35,7 @@ int initSDCard() {
     return 0;
 }
 
-void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
+int SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Listing directory: %s\n\r", dirname);
     #endif
@@ -46,7 +46,7 @@ void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
             DEBUG_SERIAL.println("Failed to open directory");
         #endif
 
-        return;
+        return 0;
     }
     if (!root.isDirectory()) {
         #ifdef DEBUG_SERIAL
@@ -78,7 +78,7 @@ void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     }
 }
 
-bool SD_createDir(fs::FS &fs, const char * path) {
+int SD_createDir(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Creating Dir: %s ...", path);
     #endif
@@ -86,21 +86,33 @@ bool SD_createDir(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.println(_success ? "done!" : "couldn't create directory!");
     #endif
-    return _success;
+
+    if (_success== true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
-bool SD_removeDir(fs::FS &fs, const char * path) {
+int SD_removeDir(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Removing Dir: %s ", path);
     #endif
+
     bool _success = fs.rmdir(path);
+
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.println(_success ? "done!" : "couldn't remove directory!");
     #endif
-    return _success;
+
+    if (_success== true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
-bool SD_readFile(fs::FS &fs, const char * path) {
+int SD_readFile(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Reading file: %s\r\n", path);
     #endif
@@ -110,7 +122,7 @@ bool SD_readFile(fs::FS &fs, const char * path) {
         #ifdef DEBUG_SERIAL
             DEBUG_SERIAL.println("Failed to open file for reading");
         #endif
-        return false;
+        return FILE_FAIL_COULDNT_OPEN;
     }
 
     #ifdef DEBUG_SERIAL
@@ -122,20 +134,20 @@ bool SD_readFile(fs::FS &fs, const char * path) {
         #endif
     }
     file.close();
-    return true;
+    return 0;
 }
 
-bool SD_writeFile(fs::FS &fs, const char * path, const char * message) {
+int SD_writeFile(fs::FS &fs, const char * path, const char * message) {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Writing file: %s\n\r", path);
     #endif
-    
+
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
         #ifdef SDCARD_DEBUG
             DEBUG_SERIAL.println("Failed to open file for writing");
         #endif
-        return false;
+        return FILE_FAIL_COULDNT_OPEN;
     }
 
     bool _success = file.print(message);
@@ -143,10 +155,15 @@ bool SD_writeFile(fs::FS &fs, const char * path, const char * message) {
         DEBUG_SERIAL.println(_success ? "Message written!" : "Failed to write message");
     #endif
     file.close();
-    return _success;
+
+    if (_success == true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
-bool SD_appendFile(fs::FS &fs, const char * path, const char * message) {
+int SD_appendFile(fs::FS &fs, const char * path, const char * message) {
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Appending file: %s\n\r", path);
     #endif
@@ -156,7 +173,7 @@ bool SD_appendFile(fs::FS &fs, const char * path, const char * message) {
         #ifdef SDCARD_DEBUG
             DEBUG_SERIAL.println("Failed to open file for appending");
         #endif
-        return false;
+        return FILE_FAIL_COULDNT_OPEN;
     }
 
     bool _success = file.print(message);
@@ -164,10 +181,15 @@ bool SD_appendFile(fs::FS &fs, const char * path, const char * message) {
         DEBUG_SERIAL.println(_success ? "Message appended!" : "Failed to append message");
     #endif
     file.close();
-    return _success;
+
+    if (_success == true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
-bool SD_renameFile(fs::FS &fs, const char * path1, const char * path2) {
+int SD_renameFile(fs::FS &fs, const char * path1, const char * path2) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Renaming file %s to %s\n\r", path1, path2);
     #endif
@@ -175,10 +197,15 @@ bool SD_renameFile(fs::FS &fs, const char * path1, const char * path2) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.println(_success ? "File renamed" : "Failed to rename file");
     #endif
-    return _success;
+
+    if (_success == true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
-bool SD_deleteFile(fs::FS &fs, const char * path) {
+int SD_deleteFile(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Deleting file: %s\n\r", path);
     #endif
@@ -186,7 +213,12 @@ bool SD_deleteFile(fs::FS &fs, const char * path) {
     #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.println(_success ? "File deleted" : "Failed to delete file");
     #endif
-    return _success;
+
+    if (_success == true) {
+        return 0;
+    } else {
+        return FILE_FAIL_GENERAL;
+    }
 }
 
 void SD_testFileIO(fs::FS &fs, const char * path) {
@@ -239,7 +271,7 @@ void SD_testFileIO(fs::FS &fs, const char * path) {
     file.close();
 }
 
-bool SD_initLogFile(fs::FS &fs, char * path, char * header) {
+int SD_initLogFile(fs::FS &fs, char * path, char * header) {
     for (uint8_t x=0; x<255; x++) { // Initialize log file
         sprintf(path, "/log_%03d.csv", x);
         if (!fs.exists(path)) break; // If a new unique log file has been named, exit loop
@@ -249,7 +281,7 @@ bool SD_initLogFile(fs::FS &fs, char * path, char * header) {
         #ifdef SDCARD_DEBUG
             DEBUG_SERIAL.println("Unable to open file for writing");
         #endif
-        return false; // If unable to open the new log file, return an error
+        return FILE_FAIL_COULDNT_OPEN; // If unable to open the new log file, return an error
     }
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Logging to: %s", path);
@@ -257,5 +289,5 @@ bool SD_initLogFile(fs::FS &fs, char * path, char * header) {
 
     // Write header for the log file
     SD_writeFile(fs, path, header);
-    return true;
+    return 0;
 }

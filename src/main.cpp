@@ -16,6 +16,12 @@ void serialError(const char * msg, int error ) {
     Serial.printf( "ERROR [%d]: %s \n", error, msg );
 }
 
+/* Initializes the following: 
+*   -- Serial connection
+*   -- SD card
+*   -- LoRa Radio
+*   -- Files in root directory on SD card
+*/
 void setup() {
 	Serial.begin(115200);
 	while(!Serial); // Wait for serial connection to open
@@ -35,20 +41,6 @@ void setup() {
     LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, FSPI_CS_PIN);
     LoRa.setSPI(LoRaSPI);
 
-    // Initialize files for Telemetery, State, and Log data
-    #ifndef SERIAL
-        int status = initSDcard();
-        if (status != 0){
-            serialError("SD card setup failed.", status);
-        }
-    #endif
-    
-    SD_createDir(SD, "/EVEdir");
-    SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
-    SD_writeFile(SD, StateFile, "State Fle: ");
-    SD_writeFile(SD, LogFile, "Log File: ");
-    SD_writeFile(SD, CommandFile, "Command File:");
-
     // TO-DO: Add Blink header file to have error blink codes for Core
     if (!LoRa.begin(915E6)) {
         serialError("G: Starting LoRa failed!", 0);
@@ -56,6 +48,35 @@ void setup() {
     }
     LoRa.setSyncWord(0xF3);
     Serial.println("done!");
+
+    // Initialize files for Telemetery, State, and Log data
+    #ifndef SERIAL
+        int status = initSDcard();
+        if (status != 0){
+            serialError("SD card setup failed.", status);
+        }
+    #endif
+
+    int status = SD_createDir(SD, "/EVEdir");
+    if (status != 0) {
+        serialError("failed to create EVE Directory", status);
+    }
+    int status = SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
+        if (status != 0) {
+        serialError("failed to create Telemetry data file", status);
+    }
+    int status = SD_writeFile(SD, StateFile, "State Fle: ");
+    if (status != 0) {
+        serialError("failed to create State data file", status);
+    }
+    int status = SD_writeFile(SD, LogFile, "Log File: ");
+    if (status != 0) {
+        serialError("failed to create logging data file", status);
+    }
+    int status = SD_writeFile(SD, CommandFile, "Command File:");
+    if (status != 0) {
+        serialError("failed to create command data file", status);
+    }
 
     Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \
@@ -101,22 +122,32 @@ void loop() {
                 #ifdef DIAGNOSTIC
                     Serial.println("Log packet Recieved");
                 #endif
-                SD_appendFile(SD,LogFile,_buf);
+                int success = SD_appendFile(SD,LogFile,_buf);
+                if (success == 0) {
+                    serialError("Failed to write Logging Data", success);
+                }
             break;
             case COMMAND_PACKET:
                 #ifdef DIAGNOSTIC
                     Serial.println("Command Recieved");
                 #endif
-                SD_appendFile(SD,CommandFile,_buf);
+                int success = SD_appendFile(SD,CommandFile,_buf);
+                if (success == 0) {
+                    serialError("Failed to write to Command File", success);
+                }
             break;
             case STATE_PACKET:
                 #ifdef DIAGNOSTIC
                     Serial.println("State Recieved");
                 #endif
-                SD_appendFile(SD,StateFile,_buf);
+                int success = SD_appendFile(SD,StateFile,_buf);
+                if (success == 0) {
+                    serialError("Failed to write Log Packet", success);
+                }
             break;
             default:
                 Serial.println("Unknown LoRa Packet Type");
+
             break;
         }
     }

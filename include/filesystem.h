@@ -8,6 +8,10 @@
 #define EVE_FILESYSTEM_H
 
 #define SETUP_FAIL_SD_CARD -4
+#define FILE_FAIL_NO_DIRECTORY -5
+#define FILE_FAIL_NOT_DIRECTORY -6
+#define FILE_FAIL_GENERAL -7
+#define FILE_FAIL_COULDNT_OPEN -8
 
 #include <stdint.h>
 #include <FS.h>
@@ -32,40 +36,40 @@ int initSDcard();
 *   @param: full filepath string with name
 *   @param: level integer of subfolder in directory that is being checked.
 */
-void SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+int SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 
 /* creates desired directory at specified path synchronously
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @return: success boolean Default: true */
-bool SD_createDir(fs::FS &fs, const char * path); 
+int SD_createDir(fs::FS &fs, const char * path); 
 
 /* Removes an EMPTY directory
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @return: success boolean Default: true */
-bool SD_removeDir(fs::FS &fs, const char * path); 
+int SD_removeDir(fs::FS &fs, const char * path); 
 
 /* Opens and reads the specified file, then closes it.
 *  If DEBUG_SERIAL is defined, contents are written to Serial port. 
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @return: success boolean Default: true */
-bool SD_readFile(fs::FS &fs, const char * path);
+int SD_readFile(fs::FS &fs, const char * path);
 
 /* Opens the file, rewrites file contents, closes the file.
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @param: message string to be stored in file
 *   @return: success boolean Default: true */
-bool SD_writeFile(fs::FS &fs, const char * path, const char * message);
+int SD_writeFile(fs::FS &fs, const char * path, const char * message);
 
 /* Opens the file, adds message to end of file, closes the file.
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @param: message string to be appended
 *   @return: success boolean Default: true */
-bool SD_appendFile(fs::FS &fs, const char * path, const char * message);
+int SD_appendFile(fs::FS &fs, const char * path, const char * message);
 
 /* Opens the file, renames the file, closes the file.
 *   @param: filesystem (SD)
@@ -73,14 +77,14 @@ bool SD_appendFile(fs::FS &fs, const char * path, const char * message);
 *   @param: new filepath string with name
 *   @param: message string to be appended
 *   @return: success boolean Default: true */
-bool SD_renameFile(fs::FS &fs, const char * path1, const char * path2);
+int SD_renameFile(fs::FS &fs, const char * path1, const char * path2);
 
 /* 
 *   @param: filesystem (SD)
 *   @param: string with path name
 *   @param: message string to be appended
 *   @return: success boolean Default: true */
-bool SD_deleteFile(fs::FS &fs, const char * path);
+int SD_deleteFile(fs::FS &fs, const char * path);
 
 /* Writes about 1 MB (2048 * 512 bytes) of data to the file path that you provide and measures the write time
 *  Reads the same file and measures the read time
@@ -97,6 +101,6 @@ void SD_testFileIO(fs::FS &fs, const char * path);
 *   @param: full filepath string with name
 *   @param: header string for file
 *   @return: success boolean Default: true */
-bool SD_initLogFile(fs::FS &fs, char * path, char * header);
+int SD_initLogFile(fs::FS &fs, char * path, char * header);
 
 #endif
