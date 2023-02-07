@@ -1,20 +1,17 @@
-#include <FS.h>
-#include <SD.h>
-#include <SPI.h>
 #include <ESP32FtpServer.h>
 #include <ESP32_files.h>
 #include <filesystem.h>
 
-
 // ESP32: Guide for MicroSD Card Module using Arduino IDE
 // Used for this Filesystem
 // https://randomnerdtutorials.com/esp32-microsd-card-arduino/
-// #define DEBUG_SERIAL Serial // TODO: Declare this in a variants file
+#define DEBUG_SERIAL Serial // TODO: Declare this in a variants file
 
-const char * TelemetryFile = "/EVEDir/TelemetryFile.txt";
-const char * StateFile     = "/EVEDir/StateFile.txt";
-const char * LogFile       = "/EVEDir/LogFile.txt";
-const char * CommandFile   = "/EVEDir/CommandFile.txt";
+const char * EVEDir        = "EVE";
+const char * TelemetryFile = "/EVE/TelemetryFile.txt";
+const char * StateFile     = "/EVE/StateFile.txt";
+const char * LogFile       = "/EVE/LogFile.txt";
+const char * CommandFile   = "/EVE/CommandFile.txt";
 
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
@@ -52,7 +49,7 @@ int SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
         #ifdef DEBUG_SERIAL
             DEBUG_SERIAL.println("Not a directory");
         #endif
-        return;
+        return 0;
     }
 
     File file = root.openNextFile();
@@ -76,6 +73,7 @@ int SD_listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
         }
         file = root.openNextFile();
     }
+    return 0;
 }
 
 int SD_createDir(fs::FS &fs, const char * path) {
@@ -138,20 +136,20 @@ int SD_readFile(fs::FS &fs, const char * path) {
 }
 
 int SD_writeFile(fs::FS &fs, const char * path, const char * message) {
-    #ifdef SDCARD_DEBUG
+    #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.printf("Writing file: %s\n\r", path);
     #endif
 
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
-        #ifdef SDCARD_DEBUG
+        #ifdef DEBUG_SERIAL
             DEBUG_SERIAL.println("Failed to open file for writing");
         #endif
         return FILE_FAIL_COULDNT_OPEN;
     }
-
+        
     bool _success = file.print(message);
-    #ifdef SDCARD_DEBUG
+    #ifdef DEBUG_SERIAL
         DEBUG_SERIAL.println(_success ? "Message written!" : "Failed to write message");
     #endif
     file.close();
@@ -221,7 +219,7 @@ int SD_deleteFile(fs::FS &fs, const char * path) {
     }
 }
 
-void SD_testFileIO(fs::FS &fs, const char * path) {
+int SD_testFileIO(fs::FS &fs, const char * path) {
     File file = fs.open(path);
     static uint8_t buf[512];
     size_t len = 0;
@@ -256,7 +254,7 @@ void SD_testFileIO(fs::FS &fs, const char * path) {
         #ifdef DEBUG_SERIAL
             DEBUG_SERIAL.println("Failed to open file for writing");
         #endif
-        return;
+        return FILE_FAIL_COULDNT_OPEN;
     }
 
     size_t i;
@@ -269,6 +267,7 @@ void SD_testFileIO(fs::FS &fs, const char * path) {
         DEBUG_SERIAL.printf("%u bytes written for %u ms\n\r", 2048 * 512, end);
     #endif
     file.close();
+    return 0;
 }
 
 int SD_initLogFile(fs::FS &fs, char * path, char * header) {

@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <FS.h>
 
+extern const char * EVEDir;
 extern const char * TelemetryFile;
 extern const char * StateFile;
 extern const char * LogFile;
@@ -91,7 +92,7 @@ int SD_deleteFile(fs::FS &fs, const char * path);
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 */
-void SD_testFileIO(fs::FS &fs, const char * path);
+int SD_testFileIO(fs::FS &fs, const char * path);
 
 /* Attempts to create logfile using sprintf with unique filename
 *  using a recursive loop between 0 and 255; capable of recording 254 files.

@@ -1,3 +1,6 @@
+#include <FS.h>
+#include <SD.h>
+#include <SPI.h>
 #include <pins.h>
 #include <LoRa.h>
 #include <radio.h>
@@ -6,7 +9,10 @@
 #include <telemetry.h>
 #include <filesystem.h>
 
-#define SERIAL
+#ifndef SERIAL
+    #define SERIAL
+#endif
+
 
 /* Prints error message to the serial port. 
 * @param msg: string describing error message
@@ -56,29 +62,53 @@ void setup() {
             serialError("SD card setup failed.", status);
         }
     #endif
+    // Try and create  new file in the root directory
+    // Serial.println("creating a test file...");
 
-    int status = SD_createDir(SD, "/EVEdir");
-    if (status != 0) {
-        serialError("failed to create EVE Directory", status);
-    }
-    int status = SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
+    // int status1 = SD_writeFile(SD,"/TestFile.txt", "This is test #1");
+    // if (status1 != 0) {
+    //     Serial.println("Failed to write the test file.");
+    // } else { 
+    //     Serial.println("Successfully created the test file");
+    // }
+
+    // Try to open EVE directory on SD card
+    // if it does not exist, create the directory
+    File EVE_Root = SD.open(EVEDir);
+    
+    if (!EVE_Root) {
+        Serial.println("No EVE directory. Making Directory...");
+        int status = SD_createDir(SD, EVEDir);
         if (status != 0) {
-        serialError("failed to create Telemetry data file", status);
-    }
-    int status = SD_writeFile(SD, StateFile, "State Fle: ");
-    if (status != 0) {
-        serialError("failed to create State data file", status);
-    }
-    int status = SD_writeFile(SD, LogFile, "Log File: ");
-    if (status != 0) {
-        serialError("failed to create logging data file", status);
-    }
-    int status = SD_writeFile(SD, CommandFile, "Command File:");
-    if (status != 0) {
-        serialError("failed to create command data file", status);
+            serialError("failed to create EVE Directory", status);
+        }
+    } else if (!EVE_Root.isDirectory()) {
+        serialError("Not a Directory.", FILE_FAIL_NOT_DIRECTORY);
     }
 
-    Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
+    SD_writeFile(SD, "EVEdir/Test_File.txt", "This is a test file!");
+
+    SD_listDir(SD,"/",0);
+    
+    // create initial text files for state, telemetry, logger, and command.
+    // int status = SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
+    //     if (status != 0) {
+    //     serialError("failed to create Telemetry data file", status);
+    // }
+    // int status = SD_writeFile(SD, StateFile, "State Fle: ");
+    // if (status != 0) {
+    //     serialError("failed to create State data file", status);
+    // }
+    // int status = SD_writeFile(SD, LogFile, "Log File: ");
+    // if (status != 0) {
+    //     serialError("failed to create logging data file", status);
+    // }
+    // int status = SD_writeFile(SD, CommandFile, "Command File:");
+    // if (status != 0) {
+    //     serialError("failed to create command data file", status);
+    // }
+
+    // Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \
                     accelY (m/s),accelZ (m/s),gyroX (rad/s),gyroY (rad/s),gyroZ (rad/s), roll (°), pitch (°), yaw (°), \
                     linAccelX (m/s),linAccelY (m/s),linAccelZ (m/s),imu temp (°C),sht temp (°C),humidity (%),state,\
@@ -115,10 +145,13 @@ void loop() {
         // TO-DO: Debug file system lol
         switch(packetType) {
             case TELEMETRY_PACKET:
+            {
                 printBaseStationTelemetry();
                 SD_appendFile(SD,TelemetryFile,_buf);
             break;
+            }
             case LOG_PACKET:
+            {
                 #ifdef DIAGNOSTIC
                     Serial.println("Log packet Recieved");
                 #endif
@@ -127,7 +160,9 @@ void loop() {
                     serialError("Failed to write Logging Data", success);
                 }
             break;
+            }
             case COMMAND_PACKET:
+            {
                 #ifdef DIAGNOSTIC
                     Serial.println("Command Recieved");
                 #endif
@@ -135,8 +170,10 @@ void loop() {
                 if (success == 0) {
                     serialError("Failed to write to Command File", success);
                 }
+            }
             break;
             case STATE_PACKET:
+            {
                 #ifdef DIAGNOSTIC
                     Serial.println("State Recieved");
                 #endif
@@ -145,6 +182,7 @@ void loop() {
                     serialError("Failed to write Log Packet", success);
                 }
             break;
+            }
             default:
                 Serial.println("Unknown LoRa Packet Type");
 
