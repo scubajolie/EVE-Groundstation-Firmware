@@ -12,15 +12,15 @@
 #define FILE_FAIL_NOT_DIRECTORY -6
 #define FILE_FAIL_GENERAL -7
 #define FILE_FAIL_COULDNT_OPEN -8
+#define FILE_FAIL_NO_UNIQUE_NAME -9
 
 #include <stdint.h>
 #include <FS.h>
+#include <radio.h>
 
-extern const char * EVEDir;
-extern const char * TelemetryFile;
-extern const char * StateFile;
-extern const char * LogFile;
-extern const char * CommandFile;
+extern char         TestFilePath[80];
+extern char         EVEDir[5];
+extern const char * EVEDIR;
 
 // TODO: Change return to int using defined error types. 
 // TODO: adjust SD_initLogFile to take filename parameter (not just used for logging)
@@ -102,6 +102,6 @@ int SD_testFileIO(fs::FS &fs, const char * path);
 *   @param: full filepath string with name
 *   @param: header string for file
 *   @return: success boolean Default: true */
-int SD_initLogFile(fs::FS &fs, char * path, char * header);
+char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char * header);
 
 #endif

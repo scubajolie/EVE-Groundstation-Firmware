@@ -15,8 +15,8 @@
 
 
 /* Prints error message to the serial port. 
-* @param msg: string describing error message
-* @param error: error number (integer)
+*  -@param msg: string describing error message
+*  -@param error: error number (integer)
 */
 void serialError(const char * msg, int error ) {
     Serial.printf( "ERROR [%d]: %s \n", error, msg );
@@ -62,51 +62,34 @@ void setup() {
             serialError("SD card setup failed.", status);
         }
     #endif
-    // Try and create  new file in the root directory
-    // Serial.println("creating a test file...");
-
-    // int status1 = SD_writeFile(SD,"/TestFile.txt", "This is test #1");
-    // if (status1 != 0) {
-    //     Serial.println("Failed to write the test file.");
-    // } else { 
-    //     Serial.println("Successfully created the test file");
-    // }
 
     // Try to open EVE directory on SD card
     // if it does not exist, create the directory
-    File EVE_Root = SD.open(EVEDir);
+    File EVE_Root = SD.open(EVEDIR);
     
     if (!EVE_Root) {
         Serial.println("No EVE directory. Making Directory...");
-        int status = SD_createDir(SD, EVEDir);
+        int status = SD_createDir(SD, EVEDIR);
         if (status != 0) {
             serialError("failed to create EVE Directory", status);
         }
     } else if (!EVE_Root.isDirectory()) {
         serialError("Not a Directory.", FILE_FAIL_NOT_DIRECTORY);
     }
+    strcat(TestFilePath, EVEDIR);
+    strcat(TestFilePath,"/TestFile.txt");
+    SD_writeFile(SD, TestFilePath, "This is a test file!");
 
-    SD_writeFile(SD, "EVEdir/Test_File.txt", "This is a test file!");
+    // TODO: Check for error
+    const char * TelemetryFile = SD_initFile(SD,EVEDIR,PacketType(TELEMETRY_PACKET),"Telemetry File:/n");
+    const char * LogFile = SD_initFile(SD,EVEDIR,PacketType(LOG_PACKET),"Logging File:/n");
+    const char * CommandFile = SD_initFile(SD,EVEDIR,PacketType(COMMAND_PACKET),"Command File:/n");
+    const char * StateFile = SD_initFile(SD,EVEDIR,PacketType(STATE_PACKET),"State File:/n");
+
+    // Date Time [Source] [Type] [#]: Message
+    // TODO: Find Logging Library?
 
     SD_listDir(SD,"/",0);
-    
-    // create initial text files for state, telemetry, logger, and command.
-    // int status = SD_writeFile(SD, TelemetryFile, "Telemetry Data File:");
-    //     if (status != 0) {
-    //     serialError("failed to create Telemetry data file", status);
-    // }
-    // int status = SD_writeFile(SD, StateFile, "State Fle: ");
-    // if (status != 0) {
-    //     serialError("failed to create State data file", status);
-    // }
-    // int status = SD_writeFile(SD, LogFile, "Log File: ");
-    // if (status != 0) {
-    //     serialError("failed to create logging data file", status);
-    // }
-    // int status = SD_writeFile(SD, CommandFile, "Command File:");
-    // if (status != 0) {
-    //     serialError("failed to create command data file", status);
-    // }
 
     // Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \

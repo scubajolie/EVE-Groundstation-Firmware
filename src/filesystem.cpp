@@ -2,16 +2,16 @@
 #include <ESP32_files.h>
 #include <filesystem.h>
 
+
+
 // ESP32: Guide for MicroSD Card Module using Arduino IDE
 // Used for this Filesystem
 // https://randomnerdtutorials.com/esp32-microsd-card-arduino/
 #define DEBUG_SERIAL Serial // TODO: Declare this in a variants file
 
-const char * EVEDir        = "EVE";
-const char * TelemetryFile = "/EVE/TelemetryFile.txt";
-const char * StateFile     = "/EVE/StateFile.txt";
-const char * LogFile       = "/EVE/LogFile.txt";
-const char * CommandFile   = "/EVE/CommandFile.txt";
+char         TestFilePath[80];
+const char * EVEDIR        = "/EVE";
+
 
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
@@ -270,13 +270,48 @@ int SD_testFileIO(fs::FS &fs, const char * path) {
     return 0;
 }
 
-int SD_initLogFile(fs::FS &fs, char * path, char * header) {
+char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char * header) {
+    char FilePath[80];
+    char FileName[80];
+
+    strcat(FilePath, path);
+    
     for (uint8_t x=0; x<255; x++) { // Initialize log file
-        sprintf(path, "/log_%03d.csv", x);
-        if (!fs.exists(path)) break; // If a new unique log file has been named, exit loop
-        if (x==254) return false; // If no unique log could be created, return an error
+        switch(packet) {
+            case (PacketType) TELEMETRY_PACKET:
+            {
+                sprintf(FileName, "/TELEMETRY_%03d.csv", x);
+                break;
+            }
+            case (PacketType) LOG_PACKET:
+            {
+                sprintf(FileName,"/LOG_%03d.txt", x);
+                break;
+            }
+            case (PacketType) COMMAND_PACKET:
+            {
+                sprintf(FileName, "/COMMAND_%03d.txt", x);
+                break;
+            }
+            case (PacketType) STATE_PACKET:
+            {
+                sprintf(FileName,"/STATE_%03d.txt",x);
+                break;
+            }
+        }
+        
+        strcat(FilePath, FileName);
+
+        if (!fs.exists(FilePath)) break; // If a new unique log file has been named, exit loop
+        if (x==254) return FILE_FAIL_NO_UNIQUE_NAME; // If no unique log could be created, return an error
+
+        // TODO: remove filename without messing with filepath each time
+        memset(FilePath, '\0', 80);
+
+        strcat(FilePath, path);
     }
-    if (!fs.open(path, FILE_WRITE)) {
+
+    if (!fs.open(FilePath, FILE_WRITE)) {
         #ifdef SDCARD_DEBUG
             DEBUG_SERIAL.println("Unable to open file for writing");
         #endif
@@ -287,6 +322,6 @@ int SD_initLogFile(fs::FS &fs, char * path, char * header) {
     #endif
 
     // Write header for the log file
-    SD_writeFile(fs, path, header);
+    SD_writeFile(fs, FilePath, header);
     return 0;
-}
+} 
