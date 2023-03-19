@@ -18,9 +18,14 @@
 #include <FS.h>
 #include <radio.h>
 
-extern char         TestFilePath[80];
-extern char         EVEDir[5];
+extern       char   TestFilePath[80];
+extern       char   EVEDir[5];
+extern       char * FilePath;
 extern const char * EVEDIR;
+extern const char * TelemetryFile;
+extern const char * LogFile;
+extern const char * CommandFile;
+extern const char * StateFile;
 
 // TODO: Change return to int using defined error types. 
 // TODO: adjust SD_initLogFile to take filename parameter (not just used for logging)
@@ -101,7 +106,7 @@ int SD_testFileIO(fs::FS &fs, const char * path);
 *   @param: filesystem (SD)
 *   @param: full filepath string with name
 *   @param: header string for file
-*   @return: success boolean Default: true */
+*   @return: Filepath string pointer */
 char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char * header);
 
 #endif

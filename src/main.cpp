@@ -10,7 +10,7 @@
 #include <filesystem.h>
 
 #ifndef SERIAL
-    #define SERIAL
+    #define SERIAL Serial
 #endif
 
 
@@ -77,19 +77,33 @@ void setup() {
         serialError("Not a Directory.", FILE_FAIL_NOT_DIRECTORY);
     }
     strcat(TestFilePath, EVEDIR);
-    strcat(TestFilePath,"/TestFile.txt");
-    SD_writeFile(SD, TestFilePath, "This is a test file!");
+    strcat(TestFilePath,"/TestLog.txt");
+    SD_writeFile(SD, TestFilePath, "Begin Test Log File:");
 
     // TODO: Check for error
-    const char * TelemetryFile = SD_initFile(SD,EVEDIR,PacketType(TELEMETRY_PACKET),"Telemetry File:/n");
-    const char * LogFile = SD_initFile(SD,EVEDIR,PacketType(LOG_PACKET),"Logging File:/n");
-    const char * CommandFile = SD_initFile(SD,EVEDIR,PacketType(COMMAND_PACKET),"Command File:/n");
-    const char * StateFile = SD_initFile(SD,EVEDIR,PacketType(STATE_PACKET),"State File:/n");
+
+    TelemetryFile = SD_initFile(SD,EVEDIR,PacketType(TELEMETRY_PACKET),"Telemetry File:/n");
+    if (TelemetryFile[0] == '-') {
+        serialError(TelemetryFile, FILE_FAIL_GENERAL);
+    }
+    LogFile = SD_initFile(SD,EVEDIR,PacketType(LOG_PACKET),"Logging File:/n");
+    if (LogFile[0] == '-') {
+        serialError(TelemetryFile, FILE_FAIL_GENERAL);
+    }
+    CommandFile = SD_initFile(SD,EVEDIR,PacketType(COMMAND_PACKET),"Command File:/n");
+    if (CommandFile[0] == '-') {
+        serialError(TelemetryFile, FILE_FAIL_GENERAL);
+    }
+    StateFile = SD_initFile(SD,EVEDIR,PacketType(STATE_PACKET),"State File:/n");
+    if (StateFile[0] == '-') {
+        serialError(TelemetryFile, FILE_FAIL_GENERAL);
+    }
 
     // Date Time [Source] [Type] [#]: Message
     // TODO: Find Logging Library?
 
     SD_listDir(SD,"/",0);
+    SD_listDir(SD,EVEDir,0);
 
     // Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \

@@ -11,7 +11,11 @@
 
 char         TestFilePath[80];
 const char * EVEDIR        = "/EVE";
-
+const char * TelemetryFile;
+const char * LogFile;
+const char * CommandFile;
+const char * StateFile;
+char * FilePath;
 
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
@@ -271,10 +275,9 @@ int SD_testFileIO(fs::FS &fs, const char * path) {
 }
 
 char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char * header) {
-    char FilePath[80];
     char FileName[80];
 
-    strcat(FilePath, path);
+    strcpy(FilePath, path);
     
     for (uint8_t x=0; x<255; x++) { // Initialize log file
         switch(packet) {
@@ -303,8 +306,11 @@ char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char 
         strcat(FilePath, FileName);
 
         if (!fs.exists(FilePath)) break; // If a new unique log file has been named, exit loop
-        if (x==254) return FILE_FAIL_NO_UNIQUE_NAME; // If no unique log could be created, return an error
-
+        if (x==254) 
+        {
+              sprintf(FilePath, "%d", FILE_FAIL_NO_UNIQUE_NAME);
+            return  FilePath;  // If no unique log could be created, return an error
+        }
         // TODO: remove filename without messing with filepath each time
         memset(FilePath, '\0', 80);
 
@@ -315,7 +321,8 @@ char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char 
         #ifdef SDCARD_DEBUG
             DEBUG_SERIAL.println("Unable to open file for writing");
         #endif
-        return FILE_FAIL_COULDNT_OPEN; // If unable to open the new log file, return an error
+        sprintf(FilePath, "%d", FILE_FAIL_COULDNT_OPEN);
+        return FilePath; // If unable to open the new log file, return an error
     }
     #ifdef SDCARD_DEBUG
         DEBUG_SERIAL.printf("Logging to: %s", path);
@@ -323,5 +330,5 @@ char * SD_initFile(fs::FS &fs, const char * path, PacketType packet, const char 
 
     // Write header for the log file
     SD_writeFile(fs, FilePath, header);
-    return 0;
+    return FilePath;
 } 
