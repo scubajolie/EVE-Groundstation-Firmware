@@ -82,7 +82,7 @@ void setup() {
 
     // TODO: Check for error
 
-    TelemetryFile = SD_initFile(SD,EVEDIR,PacketType(TELEMETRY_PACKET),"Telemetry File:/n");
+    TelemetryFile = SD_initFile(SD, EVEDIR, PacketType(TELEMETRY_PACKET),"Telemetry File:/n");
     if (TelemetryFile[0] == '-') {
         serialError(TelemetryFile, FILE_FAIL_GENERAL);
     }
@@ -103,7 +103,7 @@ void setup() {
     // TODO: Find Logging Library?
 
     SD_listDir(SD,"/",0);
-    SD_listDir(SD,EVEDir,0);
+    SD_listDir(SD,EVEDIR,0);
 
     // Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \
