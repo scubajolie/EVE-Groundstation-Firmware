@@ -1,3 +1,18 @@
+/**
+* PROJECT EVE
+* FLORIDA INSTITUTE OF TECHNOLOGY, OEMS DEPARTMENT
+* UNDERWATER TECHNOLOGY LABORATORY
+* Supervising Professor: Dr. Stephen Wood, Ph.D, PE
+*
+* @file   Ground Station Firmware Version 1.1
+* @date   4/26/2023
+* @author Braidan Duffy & Jolie Elliott
+* 
+* Theory of Operation:
+*/
+
+
+
 #include <FS.h>
 #include <SD.h>
 #include <SPI.h>
@@ -34,15 +49,17 @@ void setup() {
 
     // If connected to the serial port, establish wifi and FTP server connection. 
     #ifdef SERIAL
-        int status = ESP32_setup();
+        // int status = ESP32_setup();
+        int status = initSDcard();
         if (status != 0) {
-            serialError("ESP32_setup failed.", status );
+            serialError("initSDcard failed.", status );
             return;
         }
     #endif
 
 	// Initialize LoRa Radio
 	Serial.print("Initializing radio...");
+    SPIClass LoRaSPI(FSPI);
     LoRa.setPins(RFM_CS_PIN, RFM_RST_PIN, RFM_IRQ_PIN);
     LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, FSPI_CS_PIN);
     LoRa.setSPI(LoRaSPI);
@@ -102,8 +119,8 @@ void setup() {
     // Date Time [Source] [Type] [#]: Message
     // TODO: Find Logging Library?
 
-    SD_listDir(SD,"/",0);
-    SD_listDir(SD,EVEDIR,0);
+    // SD_listDir(SD,"/",0);
+    // SD_listDir(SD,EVEDIR,0);
 
     // Serial.println("Timestamp (ISO8601),voltage,GPSFix,numSats,HDOP,latitude (°),longitude (­°),speed (kts),course (°), \
                     barometer temp (°C),pressure (Pa),altitude AGL (m),sysCal,gyroCal,accelCal,magCal,accelX (m/s), \
@@ -114,7 +131,7 @@ void setup() {
 
 void loop() {
 
-    ESP32_loop();
+    // ESP32_loop();
 
     // try to parse packet
     int packetSize = LoRa.parsePacket();
@@ -122,68 +139,71 @@ void loop() {
         // received a packet
         // Serial.print("Received packet '");
         
-        byte UUID = LoRa.read(); // First byte is the Launchsonde UUID
-        byte destUUID = LoRa.read(); // Second byte is the destination UUID
-        byte packetType = LoRa.read(); // Third byte is the packet type
+        // byte UUID = LoRa.read(); // First byte is the Launchsonde UUID
+        // byte destUUID = LoRa.read(); // Second byte is the destination UUID
+        // byte packetType = LoRa.read(); // Third byte is the packet type
+        Serial.println("Received packet '");
+
 
         // read packet
         char _buf[sizeof(data)+1];
         int i = 0;
         while (LoRa.available()) {
-            char _byte = LoRa.read();
-            _buf[i] = _byte;
-            i++;
+            Serial.print((char)LoRa.read());
+            // char _byte = LoRa.read();
+            // _buf[i] = _byte;
+            // i++;
             // Serial.print(_byte, HEX); // DEBUG
         }
-        memcpy(&data, _buf, sizeof(data)+1);
+        // memcpy(&data, _buf, sizeof(data)+1);
 
         // check packet type, write to terminal and file
         // TO-DO: Write to files for each type of packet
         // TO-DO: Debug file system lol
-        switch(packetType) {
-            case TELEMETRY_PACKET:
-            {
-                printBaseStationTelemetry();
-                SD_appendFile(SD,TelemetryFile,_buf);
-            break;
-            }
-            case LOG_PACKET:
-            {
-                #ifdef DIAGNOSTIC
-                    Serial.println("Log packet Recieved");
-                #endif
-                int success = SD_appendFile(SD,LogFile,_buf);
-                if (success == 0) {
-                    serialError("Failed to write Logging Data", success);
-                }
-            break;
-            }
-            case COMMAND_PACKET:
-            {
-                #ifdef DIAGNOSTIC
-                    Serial.println("Command Recieved");
-                #endif
-                int success = SD_appendFile(SD,CommandFile,_buf);
-                if (success == 0) {
-                    serialError("Failed to write to Command File", success);
-                }
-            }
-            break;
-            case STATE_PACKET:
-            {
-                #ifdef DIAGNOSTIC
-                    Serial.println("State Recieved");
-                #endif
-                int success = SD_appendFile(SD,StateFile,_buf);
-                if (success == 0) {
-                    serialError("Failed to write Log Packet", success);
-                }
-            break;
-            }
-            default:
-                Serial.println("Unknown LoRa Packet Type");
+        // switch(packetType) {
+        //     case TELEMETRY_PACKET:
+        //     {
+        //         printBaseStationTelemetry();
+        //         SD_appendFile(SD,TelemetryFile,_buf);
+        //     break;
+        //     }
+        //     case LOG_PACKET:
+        //     {
+        //         #ifdef DIAGNOSTIC
+        //             Serial.println("Log packet Recieved");
+        //         #endif
+        //         int success = SD_appendFile(SD,LogFile,_buf);
+        //         if (success == 0) {
+        //             serialError("Failed to write Logging Data", success);
+        //         }
+        //     break;
+        //     }
+        //     case COMMAND_PACKET:
+        //     {
+        //         #ifdef DIAGNOSTIC
+        //             Serial.println("Command Recieved");
+        //         #endif
+        //         int success = SD_appendFile(SD,CommandFile,_buf);
+        //         if (success == 0) {
+        //             serialError("Failed to write to Command File", success);
+        //         }
+        //     }
+        //     break;
+        //     case STATE_PACKET:
+        //     {
+        //         #ifdef DIAGNOSTIC
+        //             Serial.println("State Recieved");
+        //         #endif
+        //         int success = SD_appendFile(SD,StateFile,_buf);
+        //         if (success == 0) {
+        //             serialError("Failed to write Log Packet", success);
+        //         }
+        //     break;
+        //     }
+        //     default:
+        //         Serial.println("Unknown LoRa Packet Type");
 
-            break;
-        }
+        //     break;
+        // }
     }
 }

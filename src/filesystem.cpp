@@ -1,6 +1,7 @@
 #include <ESP32FtpServer.h>
 #include <ESP32_files.h>
 #include <filesystem.h>
+#include <pins.h>
 
 
 
@@ -20,14 +21,12 @@ char * FilePath;
 // TODO: Change ifdefs so that when groundstation is connected
 // all error messages are sent.
 
-int initSDCard() {
-    #ifdef SDCARD_DEBUG
-        DEBUG_SERIAL.print("Initializing filesystem...");
-    #endif
-    bool _success = SD.begin(14, SD_SPI);
-    #ifdef SDCARD_DEBUG
-        DEBUG_SERIAL.println(_success ? "done!" : "Failed to initialize filesystem!");
-    #endif
+int initSDcard() {
+
+    DEBUG_SERIAL.print("Initializing filesystem...");
+    bool _success = SD.begin(SD_CS_PIN, SD_SPI);
+    DEBUG_SERIAL.println(_success ? "done!" : "Failed to initialize filesystem!");
+
     uint8_t cardType = SD.cardType();
     if (cardType == CARD_NONE) {
         Serial.println("No SD card attached");
