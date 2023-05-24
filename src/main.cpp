@@ -20,7 +20,6 @@
 #include <LoRa.h>
 #include <radio.h>
 #include <fstream>
-#include <ESP32FtpServer.h>
 #include <telemetry.h>
 #include <filesystem.h>
 
@@ -49,11 +48,9 @@ void setup() {
 
     // If connected to the serial port, establish wifi and FTP server connection. 
     #ifdef SERIAL
-        // int status = ESP32_setup();
         int status = initSDcard();
         if (status != 0) {
             serialError("initSDcard failed.", status );
-            return;
         }
     #endif
 
@@ -61,8 +58,9 @@ void setup() {
 	Serial.print("Initializing radio...");
     SPIClass LoRaSPI(FSPI);
     LoRa.setPins(RFM_CS_PIN, RFM_RST_PIN, RFM_IRQ_PIN);
-    LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, FSPI_CS_PIN);
+    LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, RFM_CS_PIN);
     LoRa.setSPI(LoRaSPI);
+
 
     // TO-DO: Add Blink header file to have error blink codes for Core
     if (!LoRa.begin(915E6)) {
@@ -71,14 +69,6 @@ void setup() {
     }
     LoRa.setSyncWord(0xF3);
     Serial.println("done!");
-
-    // Initialize files for Telemetery, State, and Log data
-    #ifndef SERIAL
-        int status = initSDcard();
-        if (status != 0){
-            serialError("SD card setup failed.", status);
-        }
-    #endif
 
     // Try to open EVE directory on SD card
     // if it does not exist, create the directory

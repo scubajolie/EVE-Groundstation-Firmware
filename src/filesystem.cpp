@@ -1,7 +1,7 @@
-#include <ESP32FtpServer.h>
-#include <ESP32_files.h>
 #include <filesystem.h>
 #include <pins.h>
+#include <SD.h>
+#include <SPI.h>
 
 
 
@@ -22,15 +22,16 @@ char * FilePath;
 // all error messages are sent.
 
 int initSDcard() {
-
     DEBUG_SERIAL.print("Initializing filesystem...");
-    bool _success = SD.begin(SD_CS_PIN, SD_SPI);
-    DEBUG_SERIAL.println(_success ? "done!" : "Failed to initialize filesystem!");
-
-    uint8_t cardType = SD.cardType();
-    if (cardType == CARD_NONE) {
-        Serial.println("No SD card attached");
-        return SETUP_FAIL_SD_CARD;
+    SPIClass SD_SPI(FSPI);
+    SD_SPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, SD_CS_PIN);
+    // bool _success = SD.begin(SD_CS_PIN, SD_SPI);
+    if (SD.begin(SD_CS_PIN, SD_SPI)){
+        Serial.println("SD opened!");
+        return 0;
+    } else {
+        Serial.println("SD card failed to open");
+        return -1;
     }
     return 0;
 }
