@@ -11,4 +11,8 @@ enum PacketType {
     STATE_PACKET      // 3
 };
 
+void radioListen();
+
+void radioSend();
+
 #endif
