@@ -1,10 +1,28 @@
 #include <radio.h>
-#include <SPI.h>
 #include <telemetry.h>
 #include <filesystem.h>
+#include <logging.h>
 #include <LoRa.h>
+#include <pins.h>
 
-int counter = 0;
+int radiocounter = 0;
+
+void initRadio() {
+    // Initialize LoRa Radio
+	Serial.print("Initializing radio...");
+    SPIClass LoRaSPI(FSPI);
+    LoRa.setPins(RFM_CS_PIN, RFM_RST_PIN, RFM_IRQ_PIN);
+    LoRaSPI.begin(FSPI_SCLK_PIN, FSPI_MISO_PIN, FSPI_MOSI_PIN, RFM_CS_PIN);
+    LoRa.setSPI(LoRaSPI);
+
+    // TO-DO: Add Blink header file to have error blink codes for Core
+    if (!LoRa.begin(915E6)) {
+        serialError("G: Starting LoRa failed!", 0);
+        // while(true) blinkCode((byte) RADIO_ERROR_CODE, RED); // Block further code execution
+    }
+    LoRa.setSyncWord(0xF3);
+    Serial.println("done!");
+}
 
 void radioListen() {
     // try to parse packet
@@ -83,13 +101,15 @@ void radioListen() {
 
 void radioSend() {
     Serial.println("Sending Packet: ");
-    Serial.println(counter);
+    Serial.println(radiocounter);
 
     // send packet
     LoRa.beginPacket();
     LoRa.print("hello ");
-    LoRa.print(counter);
+    LoRa.print(radiocounter);
     LoRa.endPacket();
-    counter++;
+    radiocounter++;
+
+    delay(5000);
 
 }

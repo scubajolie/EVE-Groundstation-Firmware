@@ -10,4 +10,6 @@ enum LogLevel {
     TRACE         //Indicates some information that is less important than debug information
 };
 
+void serialError(const char * msg, int error );
+
 #endif
